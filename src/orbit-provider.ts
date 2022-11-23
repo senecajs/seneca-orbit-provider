@@ -4,7 +4,7 @@
 const Pkg = require('../package.json')
 
 
-type TangocardProviderOptions = {
+type OrbitProviderOptions = {
   url: string
   fetch: any
   entity: Record<string, any>
@@ -12,14 +12,13 @@ type TangocardProviderOptions = {
 }
 
 
-function TangocardProvider(this: any, options: TangocardProviderOptions) {
+function OrbitProvider(this: any, options: OrbitProviderOptions) {
   const seneca: any = this
 
   const entityBuilder = this.export('provider/entityBuilder')
 
-
   seneca
-    .message('sys:provider,provider:tangocard,get:info', get_info)
+    .message('sys:provider,provider:orbit,get:info', get_info)
 
 
   const makeUrl = (suffix: string, q: any) => {
@@ -55,7 +54,7 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
       return json
     }
     else {
-      let err: any = new Error('TangocardProvider ' + res.status)
+      let err: any = new Error('OrbitProvider ' + res.status)
       err.tangocardResponse = res
       throw err
     }
@@ -78,7 +77,62 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
       return json
     }
     else {
-      let err: any = new Error('TangocardProvider ' + res.status)
+      let err: any = new Error('OrbitProvider ' + res.status)
+      try {
+        err.body = await res.json()
+      }
+      catch (e: any) {
+        err.body = await res.text()
+      }
+      err.status = res.status
+      throw err
+    }
+  }
+
+  const deleteJSON = async (url: string, config: any) => {
+    config.body = 'string' === typeof config.body ? config.body :
+      JSON.stringify(config.body)
+
+    config.headers['Content-Type'] = config.headers['Content-Type'] ||
+      'application/json'
+
+    config.method = config.method || 'DELETE'
+
+    let res = await options.fetch(url, config)
+
+    if (200 <= res.status && res.status < 300) {
+      let json: any = await res.json()
+      return json
+    }
+    else {
+      let err: any = new Error('OrbitProvider ' + res.status)
+      try {
+        err.body = await res.json()
+      }
+      catch (e: any) {
+        err.body = await res.text()
+      }
+      err.status = res.status
+      throw err
+    }
+  }
+  const putJSON = async (url: string, config: any) => {
+    config.body = 'string' === typeof config.body ? config.body :
+      JSON.stringify(config.body)
+
+    config.headers['Content-Type'] = config.headers['Content-Type'] ||
+      'application/json'
+
+    config.method = config.method || 'PUT'
+
+    let res = await options.fetch(url, config)
+
+    if (200 <= res.status && res.status < 300) {
+      let json: any = await res.json()
+      return json
+    }
+    else {
+      let err: any = new Error('OrbitProvider ' + res.status)
       try {
         err.body = await res.json()
       }
@@ -94,7 +148,7 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
   async function get_info(this: any, _msg: any) {
     return {
       ok: true,
-      name: 'tangocard',
+      name: 'orbit',
       version: Pkg.version,
     }
   }
@@ -102,7 +156,7 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
 
   entityBuilder(this, {
     provider: {
-      name: 'tangocard'
+      name: 'orbit'
     },
     entity: {
       customer: {
@@ -208,7 +262,7 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
 
   seneca.prepare(async function(this: any) {
     let res =
-      await this.post('sys:provider,get:keymap,provider:tangocard')
+      await this.post('sys:provider,get:keymap,provider:orbit')
 
     if (!res.ok) {
       throw this.fail('keymap')
@@ -235,16 +289,18 @@ function TangocardProvider(this: any, options: TangocardProviderOptions) {
       makeConfig,
       getJSON,
       postJSON,
+      deleteJSON,
+      putJSON
     }
   }
 }
 
 
 // Default options.
-const defaults: TangocardProviderOptions = {
+const defaults: OrbitProviderOptions = {
 
   // NOTE: include trailing /
-  url: 'https://integration-api.tangocard.com/raas/v2/',
+  url: 'https://app.orbit.love/api/v1/',
 
   // Use global fetch by default - if exists
   fetch: ('undefined' === typeof fetch ? undefined : fetch),
@@ -262,10 +318,10 @@ const defaults: TangocardProviderOptions = {
 }
 
 
-Object.assign(TangocardProvider, { defaults })
+Object.assign(OrbitProvider, { defaults })
 
-export default TangocardProvider
+export default OrbitProvider
 
 if ('undefined' !== typeof (module)) {
-  module.exports = TangocardProvider
+  module.exports = OrbitProvider
 }
