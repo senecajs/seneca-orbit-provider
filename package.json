@@ -1,20 +1,20 @@
 {
-  "name": "@seneca/tangocard-provider",
+  "name": "@seneca/orbit-provider",
   "version": "0.1.2",
-  "main": "dist/tangocard-provider.js",
+  "main": "dist/orbit-provider.js",
   "type": "commonjs",
-  "types": "dist/tangocard-provider.d.ts",
-  "description": "Seneca entity provider for the Tangocard API.",
-  "homepage": "https://github.com/senecajs/seneca-tangocard-provider",
+  "types": "dist/orbit-provider.d.ts",
+  "description": "Seneca entity provider for the Orbit API.",
+  "homepage": "https://github.com/senecajs/seneca-orbit-provider",
   "keywords": [
     "seneca",
-    "tangocard",
-    "tangocard-provider"
+    "orbit",
+    "orbit-provider"
   ],
   "author": "Richard Rodger - richardrodger.com",
   "repository": {
     "type": "git",
-    "url": "git://tangocard.com/senecajs/seneca-tangocard-provider.git"
+    "url": "git://tangocard.com/senecajs/seneca-orbit-provider.git"
   },
   "scripts": {
     "test": "jest --coverage",
