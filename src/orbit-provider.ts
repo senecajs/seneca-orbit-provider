@@ -3,6 +3,7 @@
 
 const Pkg = require('../package.json')
 
+let workspace:string
 
 type OrbitProviderOptions = {
   url: string
@@ -19,6 +20,7 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
 
   seneca
     .message('sys:provider,provider:orbit,get:info', get_info)
+
 
 
   const makeUrl = (suffix: string, q: any) => {
@@ -46,24 +48,30 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
   }, config)
 
 
+  const setWorkspace = (newWorkspace: string) => {
+    workspace = newWorkspace;
+  }
+
+  const getWorkspace = () => {
+    return workspace;
+  }
+
   const getJSON = async (url: string, config?: any) => {
     let res = await options.fetch(url, config)
-
     if (200 == res.status) {
       let json: any = await res.json()
       return json
     }
     else {
       let err: any = new Error('OrbitProvider ' + res.status)
-      err.tangocardResponse = res
+      err.orbitResponse = res
       throw err
     }
   }
 
 
   const postJSON = async (url: string, config: any) => {
-    config.body = 'string' === typeof config.body ? config.body :
-      JSON.stringify(config.body)
+    config.body = 'string' === typeof config.body ? config.body : JSON.stringify(config.body)
 
     config.headers['Content-Type'] = config.headers['Content-Type'] ||
       'application/json'
@@ -72,7 +80,7 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
 
     let res = await options.fetch(url, config)
 
-    if (200 <= res.status && res.status < 300) {
+    if (201 === res.status || 200 === res.status ) {
       let json: any = await res.json()
       return json
     }
@@ -89,47 +97,19 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
     }
   }
 
-  const deleteJSON = async (url: string, config: any) => {
-    config.body = 'string' === typeof config.body ? config.body :
-      JSON.stringify(config.body)
-
-    config.headers['Content-Type'] = config.headers['Content-Type'] ||
-      'application/json'
-
-    config.method = config.method || 'DELETE'
-
-    let res = await options.fetch(url, config)
-
-    if (200 <= res.status && res.status < 300) {
-      let json: any = await res.json()
-      return json
-    }
-    else {
-      let err: any = new Error('OrbitProvider ' + res.status)
-      try {
-        err.body = await res.json()
-      }
-      catch (e: any) {
-        err.body = await res.text()
-      }
-      err.status = res.status
-      throw err
-    }
-  }
   const putJSON = async (url: string, config: any) => {
     config.body = 'string' === typeof config.body ? config.body :
-      JSON.stringify(config.body)
+    JSON.stringify(config.body)
+   
 
     config.headers['Content-Type'] = config.headers['Content-Type'] ||
       'application/json'
 
     config.method = config.method || 'PUT'
-
     let res = await options.fetch(url, config)
 
-    if (200 <= res.status && res.status < 300) {
-      let json: any = await res.json()
-      return json
+    if (204 <= res.status) {
+      return {"Success": true}
     }
     else {
       let err: any = new Error('OrbitProvider ' + res.status)
@@ -159,103 +139,102 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
       name: 'orbit'
     },
     entity: {
-      customer: {
+      list_member: {
         cmd: {
           list: {
             action: async function(this: any, entize: any, msg: any) {
-              let json: any = await getJSON(makeUrl('customers', msg.q), makeConfig())
-              let customers = json
+              let suffUrl = getWorkspace() + '/members'
+              let json: any = await getJSON(makeUrl(suffUrl, msg.q), makeConfig())
+              let customers = json.data
               let list = customers.map((data: any) => entize(data))
               return list
             },
-          }
+          },
         }
       },
-      brand: {
+      add_identity_member: {
         cmd: {
-          list: {
+          save: {
             action: async function(this: any, entize: any, msg: any) {
-              let json: any = await getJSON(makeUrl('catalogs', msg.q), makeConfig())
-              let brands = json.brands
-              let list = brands.map((data: any) => entize(data))
+              let suffUrl = getWorkspace() + '/members/' + msg.q.idMember + '/identities';
+              let body = msg.q.body;
+              let json: any = await postJSON(makeUrl(suffUrl, msg.q), makeConfig(body))
+              let data = json.data
+              let list = entize(data)
               return list
             },
           }
         }
       },
-      order: {
+      get_member: {
         cmd: {
           list: {
             action: async function(this: any, entize: any, msg: any) {
-              let json: any = await getJSON(makeUrl('orders', msg.q), makeConfig())
-              let orders = json.orders
-              let list = orders.map((data: any) => entize(data))
-
-              // TODO: ensure seneca-transport preserves array props
-              list.page = json.page
-
+              let suffUrl = getWorkspace() + '/members/' + msg.q.idMember
+              let json: any = await getJSON(makeUrl(suffUrl, msg.q), makeConfig())
+              let data = json.data
+              let list = entize(data)
               return list
             },
           },
+        }
+      },
+      find_member_by_identify: {
+        cmd: {
+          list: {
+            action: async function(this: any, entize: any, msg: any) {
+              let suffUrl = getWorkspace() + '/members/find'
+              let json: any = await getJSON(makeUrl(suffUrl, msg.q), makeConfig())
+              let data = json.data
+              let list = entize(data)
+              return list
+            },
+          },
+        }
+      },
+      list_member_by_organization: {
+        cmd: {
+          list: {
+            action: async function(this: any, entize: any, msg: any) {
+              let suffUrl = getWorkspace() + '/organizations/' + msg.q.idOrganization + '/members'
+
+              let json: any = await getJSON(makeUrl(suffUrl, msg.q), makeConfig())
+              let data = json.data
+              let list = data.map((data: any) => entize(data))
+              return list
+            },
+          },
+        }
+      },
+      update_member: {
+        cmd: {
           save: {
             action: async function(this: any, entize: any, msg: any) {
-              let body = this.util.deep(
-                this.shared.primary,
-                options.entity.order.save,
-                msg.ent.data$(false)
-              )
-
-              console.log('TANGO SAVE ORDER')
-              console.dir(body)
-
-              let json: any = await postJSON(makeUrl('orders', msg.q), makeConfig({
-                body
-              }))
-
-              console.log('TANGO SAVE ORDER RES')
-              console.dir(json)
-
-              let order = json
-              order.id = order.referenceOrderID
-              return entize(order)
+              let suffUrl = getWorkspace() + '/members/' + msg.q.idMember
+              let body = msg.q.body;
+              let res: any = await putJSON(makeUrl(suffUrl, msg.q), makeConfig(body))
+              
+              let list = entize(res)
+              return list
             },
           }
         }
-      }
+      },
+      create_or_update_member: {
+        cmd: {
+          save: {
+            action: async function(this: any, entize: any, msg: any) {
+              let suffUrl = getWorkspace() + '/members'
+              let body = msg.q.body;
+              let json: any = await postJSON(makeUrl(suffUrl, msg.q), makeConfig(body))
+              let data = json.data
+              let list = entize(data)
+              return list
+            },
+          }
+        }
+      },
     }
-
-    // save: {
-    //   action: async function(this: any, entize: any, msg: any) {
-    //     let ent = msg.ent
-    //     try {
-    //       let res
-    //       if (ent.id) {
-    //         // TODO: util to handle more fields
-    //         res = await this.shared.sdk.updateBoard(ent.id, {
-    //           desc: ent.desc
-    //         })
-    //       }
-    //       else {
-    //         // TODO: util to handle more fields
-    //         let fields = {
-    //           name: ent.name,
-    //           desc: ent.desc,
-    //         }
-    //         res = await this.shared.sdk.addBoard(fields)
-    //       }
-
-    //       return entize(res)
-    //     }
-    //     catch (e: any) {
-    //       if (e.message.includes('invalid id')) {
-    //         return null
-    //       }
-    //       else {
-    //         throw e
-    //       }
-    //     }
-    //   }
-    // }
   })
 
 
@@ -268,17 +247,11 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
       throw this.fail('keymap')
     }
 
-    let src = res.keymap.name.value + ':' + res.keymap.key.value
-    let auth = Buffer.from(src).toString('base64')
-
     this.shared.headers = {
-      Authorization: 'Basic ' + auth
+      Authorization: 'Bearer ' + res.keymap.key.value
     }
 
-    this.shared.primary = {
-      customerIdentifier: res.keymap.cust.value,
-      accountIdentifier: res.keymap.acc.value,
-    }
+    setWorkspace(res.keymap.workspace.value)
 
   })
 
@@ -289,7 +262,6 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
       makeConfig,
       getJSON,
       postJSON,
-      deleteJSON,
       putJSON
     }
   }
@@ -298,10 +270,8 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
 
 // Default options.
 const defaults: OrbitProviderOptions = {
-
   // NOTE: include trailing /
   url: 'https://app.orbit.love/api/v1/',
-
   // Use global fetch by default - if exists
   fetch: ('undefined' === typeof fetch ? undefined : fetch),
 
