@@ -2,6 +2,7 @@
 /* Copyright © 2022 Seneca Project Contributors, MIT License. */
 Object.defineProperty(exports, "__esModule", { value: true });
 const Pkg = require('../package.json');
+let workspace;
 function OrbitProvider(options) {
     const seneca = this;
     const entityBuilder = this.export('provider/entityBuilder');
@@ -27,11 +28,11 @@ function OrbitProvider(options) {
             ...seneca.shared.headers
         }
     }, config);
-    const setWorkspace = (workspace) => {
-        options.workspace = workspace || options.workspace;
+    const setWorkspace = (newWorkspace) => {
+        workspace = newWorkspace;
     };
     const getWorkspace = () => {
-        return options.workspace;
+        return workspace;
     };
     const getJSON = async (url, config) => {
         let res = await options.fetch(url, config);
@@ -201,15 +202,10 @@ function OrbitProvider(options) {
         if (!res.ok) {
             throw this.fail('keymap');
         }
-        // let src = res.keymap.name.value + ':' + res.keymap.key.value
-        // let auth = Buffer.from(src).toString('base64')
         this.shared.headers = {
             Authorization: 'Bearer ' + res.keymap.key.value
         };
-        // this.shared.primary = {
-        //   customerIdentifier: res.keymap.cust.value,
-        //   accountIdentifier: res.keymap.acc.value,
-        // }
+        setWorkspace(res.keymap.workspace.value);
     });
     return {
         exports: {
@@ -225,7 +221,6 @@ function OrbitProvider(options) {
 const defaults = {
     // NOTE: include trailing /
     url: 'https://app.orbit.love/api/v1/',
-    workspace: 'habtele',
     // Use global fetch by default - if exists
     fetch: ('undefined' === typeof fetch ? undefined : fetch),
     entity: {

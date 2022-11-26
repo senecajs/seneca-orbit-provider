@@ -1,6 +1,5 @@
 type OrbitProviderOptions = {
     url: string;
-    workspace: string;
     fetch: any;
     entity: Record<string, any>;
     debug: boolean;
