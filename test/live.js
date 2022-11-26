@@ -12,8 +12,8 @@ Seneca({ legacy: false })
     // debug: true,
     file: [__dirname + '/local-env.js;?'],
     var: {
-      ORBIT_API_TOKEN: String,
-      WORKSPACE: String,
+      $ORBIT_API_TOKEN: String,
+      $WORKSPACE: String,
     }
   })
   .use('provider', {
@@ -32,10 +32,10 @@ Seneca({ legacy: false })
 
     console.log(await seneca.post('sys:provider,provider:orbit,get:info'))
 
-    // //List members in a workspace
+    //List members in a workspace
     const list_member = await seneca.entity("provider/orbit/list_member").list$()
     console.log(list_member)
-    //   // get first user in list_member to next test
+      // get first user in list_member to next test
     let idMember = list_member[0]['id']
     let source = 'foo'
     let name = list_member[0]['attributes']['slug']
