@@ -1,5 +1,5 @@
 {
-  "name": "@seneca/orbit-provider",
+  "name": "@senecajs/seneca-orbit-provider",
   "version": "0.1.2",
   "main": "dist/orbit-provider.js",
   "type": "commonjs",
@@ -14,7 +14,7 @@
   "author": "Richard Rodger - richardrodger.com",
   "repository": {
     "type": "git",
-    "url": "git://tangocard.com/senecajs/seneca-orbit-provider.git"
+    "url": "git://orbit.com/senecajs/seneca-orbit-provider.git"
   },
   "scripts": {
     "test": "jest --coverage",
