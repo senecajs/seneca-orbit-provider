@@ -42,7 +42,7 @@ Seneca()
   })
   .use('provider', {
     provider: {
-      tangocard: {
+      orbit: {
         keys: {
           key: { value: '$ORBIT_API_TOKEN' },
           workspace: { value: '$WORKSPACE' },
