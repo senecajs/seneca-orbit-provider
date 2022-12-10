@@ -142,36 +142,28 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
               return list
             },
           },
-        }
-      },
-      add_identity_member: {
-        cmd: {
+          load: {
+              action: async function(this: any, entize: any, msg: any) {
+                let suffUrl =  this.shared.workspace + '/members/' + msg.q.idMember
+                let json: any = await getJSON(makeUrl(suffUrl, msg.q), makeConfig())
+                let data = json.data
+                let list = entize(data)
+                return list
+              },
+          },
           save: {
             action: async function(this: any, entize: any, msg: any) {
-              let suffUrl =  this.shared.workspace + '/members/' + msg.q.idMember + '/identities';
+              let suffUrl =  this.shared.workspace + '/members/' + msg.q.idMember
               let body = msg.q.body;
-              let json: any = await postJSON(makeUrl(suffUrl, msg.q), makeConfig(body))
-              let data = json.data
-              let list = entize(data)
+              let res: any = await putJSON(makeUrl(suffUrl, msg.q), makeConfig(body))
+              
+              let list = entize(res)
               return list
             },
           }
         }
       },
-      get_member: {
-        cmd: {
-          list: {
-            action: async function(this: any, entize: any, msg: any) {
-              let suffUrl =  this.shared.workspace + '/members/' + msg.q.idMember
-              let json: any = await getJSON(makeUrl(suffUrl, msg.q), makeConfig())
-              let data = json.data
-              let list = entize(data)
-              return list
-            },
-          },
-        }
-      },
-      find_member_by_identify: {
+      identity_member: {
         cmd: {
           list: {
             action: async function(this: any, entize: any, msg: any) {
@@ -182,6 +174,16 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
               return list
             },
           },
+          save: {
+            action: async function(this: any, entize: any, msg: any) {
+              let suffUrl =  this.shared.workspace + '/members/' + msg.q.idMember + '/identities';
+              let body = msg.q.body;
+              let json: any = await postJSON(makeUrl(suffUrl, msg.q), makeConfig(body))
+              let data = json.data
+              let list = entize(data)
+              return list
+            },
+          }
         }
       },
       list_member_by_organization: {
@@ -198,21 +200,7 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
           },
         }
       },
-      update_member: {
-        cmd: {
-          save: {
-            action: async function(this: any, entize: any, msg: any) {
-              let suffUrl =  this.shared.workspace + '/members/' + msg.q.idMember
-              let body = msg.q.body;
-              let res: any = await putJSON(makeUrl(suffUrl, msg.q), makeConfig(body))
-              
-              let list = entize(res)
-              return list
-            },
-          }
-        }
-      },
-      create_or_update_member: {
+      create_member: {
         cmd: {
           save: {
             action: async function(this: any, entize: any, msg: any) {
@@ -244,7 +232,6 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
     }
      
     this.shared.workspace = res.keymap.workspace.value
-    setWorkspace()
 
   })
 

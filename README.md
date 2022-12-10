@@ -52,16 +52,57 @@ Seneca()
   })
   .use('orbit-provider')
 
-let board = await seneca.entity('provider/orbit/board')
-  .load$('<orbit-board-id>')
+let listMember = await seneca.entity('provider/orbit/member')
+  .list$()
+Console.log(listMember)
 
-Console.log('BOARD', board)
+let loadMember = await seneca.entity('provider/orbit/member')
+  .load$('<member-id>')
+Console.log(loadMember)
 
-board.desc = 'New description'
-board = await board.save$()
+let body_to_update_member = {
+  'body': {
+    "name": "foo",
+    "bio": "bar"
+  }
+}
 
-Console.log('UPDATED BOARD', board)
+let saveMember = await seneca.entity('provider/orbit/member')
+  .save$({
+    'idMember': '<member-id>',
+    'body': body_to_update_member
+  })
+Console.log(saveMember)
 
+
+let addIndentifyMember = await seneca.entity("provider/orbit/identify_member")
+  .save$({
+    'idMember': idMember, 
+    'body': body_to_add_identity
+  })
+Console.log(addIndentifyMember)
+
+let identifyMember = await seneca.entity("provider/orbit/identify_member")
+  .list$({
+    'source': 'foo',
+    'username': 'bar'
+  })
+Console.log(identifyMember)
+
+
+let list_member_by_organization = await seneca.entity("provider/orbit/list_member_by_organization").list$({'idOrganization': idOrganization})
+Console.log(list_member_by_organization)
+
+let body_to_create_member = {
+  'body': {
+    "identity": {
+        "source": "api",
+        "username": "foo"
+    }
+  }
+}
+const create_or_update_member = await seneca.entity("provider/orbit/create_member").save$({'body': body_to_create_member})
+console.log(create_or_update_member)
 ```
 
 ## Install

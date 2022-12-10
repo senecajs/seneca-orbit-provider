@@ -35,7 +35,7 @@ describe('orbit-provider', () => {
         }
       }
     }
-    const create_or_update_member = await seneca.entity("provider/orbit/create_or_update_member").save$({'body': body_to_create_member})
+    const create_or_update_member = await seneca.entity("provider/orbit/create_member").save$({'body': body_to_create_member})
 
     expect(create_or_update_member['attributes']['source']).toContain('api')
     expect(create_or_update_member['attributes']['slug']).toContain('foo')

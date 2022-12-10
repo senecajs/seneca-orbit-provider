@@ -46,7 +46,7 @@ Seneca({ legacy: false })
         }
     }
     //Add identity to a member
-    const add_identity_member = await seneca.entity("provider/orbit/add_identity_member").save$({'idMember': idMember, 'body': body_to_add_identity})
+    const add_identity_member = await seneca.entity("provider/orbit/identify_member").save$({'idMember': idMember, 'body': body_to_add_identity})
     console.log('add_identity_member', add_identity_member)
 
     // Create or update a member
@@ -59,15 +59,15 @@ Seneca({ legacy: false })
         }
       }
     }
-    const create_or_update_member = await seneca.entity("provider/orbit/create_or_update_member").save$({'body': body_to_create_member})
+    const create_or_update_member = await seneca.entity("provider/orbit/create_member").save$({'body': body_to_create_member})
     console.log('create_or_update_member', create_or_update_member)
 
     //Find a member by an identity
-    const find_member_by_identify = await seneca.entity("provider/orbit/find_member_by_identify").list$({'source': source, 'username': name})
+    const find_member_by_identify = await seneca.entity("provider/orbit/identify_member").list$({'source': source, 'username': name})
     console.log('find_member_by_identify', find_member_by_identify)
 
     //Get a member
-    const get_member = await seneca.entity("provider/orbit/get_member").list$({'idMember': idMember})
+    const get_member = await seneca.entity("provider/orbit/member").load$({'idMember': idMember})
     console.log('get_member', get_member)
 
     //List members in an organization
@@ -84,7 +84,7 @@ Seneca({ legacy: false })
         "bio": "bar"
       }
     }
-    const update_member = await seneca.entity("provider/orbit/update_member").save$({'idMember': idMember, 'body': body_to_update_member})
+    const update_member = await seneca.entity("provider/orbit/member").save$({'idMember': idMember, 'body': body_to_update_member})
     console.log('update_member', update_member)
     
     return true;
