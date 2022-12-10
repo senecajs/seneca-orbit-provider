@@ -21,7 +21,7 @@ describe('orbit-provider', () => {
 
   test('get', async () => {
     const seneca = await makeSeneca()
-    const get = await seneca.entity("provider/orbit/list_member").list$()
+    const get = await seneca.entity("provider/orbit/member").list$()
     expect(get.length > 0).toBeTruthy();
   })
 

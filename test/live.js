@@ -33,7 +33,7 @@ Seneca({ legacy: false })
     console.log(await seneca.post('sys:provider,provider:orbit,get:info'))
 
     //List members in a workspace
-    const list_member = await seneca.entity("provider/orbit/list_member").list$()
+    const list_member = await seneca.entity("provider/orbit/member").list$()
     console.log(list_member)
       // get first user in list_member to next test
     let idMember = list_member[0]['id']

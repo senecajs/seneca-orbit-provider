@@ -48,14 +48,6 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
   }, config)
 
 
-  const setWorkspace = (newWorkspace: string) => {
-    workspace = newWorkspace;
-  }
-
-  const getWorkspace = () => {
-    return workspace;
-  }
-
   const getJSON = async (url: string, config?: any) => {
     let res = await options.fetch(url, config)
     if (200 == res.status) {
@@ -139,11 +131,11 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
       name: 'orbit'
     },
     entity: {
-      list_member: {
+      member: {
         cmd: {
           list: {
             action: async function(this: any, entize: any, msg: any) {
-              let suffUrl = getWorkspace() + '/members'
+              let suffUrl =  this.shared.workspace + '/members'
               let json: any = await getJSON(makeUrl(suffUrl, msg.q), makeConfig())
               let customers = json.data
               let list = customers.map((data: any) => entize(data))
@@ -156,7 +148,7 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
         cmd: {
           save: {
             action: async function(this: any, entize: any, msg: any) {
-              let suffUrl = getWorkspace() + '/members/' + msg.q.idMember + '/identities';
+              let suffUrl =  this.shared.workspace + '/members/' + msg.q.idMember + '/identities';
               let body = msg.q.body;
               let json: any = await postJSON(makeUrl(suffUrl, msg.q), makeConfig(body))
               let data = json.data
@@ -170,7 +162,7 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
         cmd: {
           list: {
             action: async function(this: any, entize: any, msg: any) {
-              let suffUrl = getWorkspace() + '/members/' + msg.q.idMember
+              let suffUrl =  this.shared.workspace + '/members/' + msg.q.idMember
               let json: any = await getJSON(makeUrl(suffUrl, msg.q), makeConfig())
               let data = json.data
               let list = entize(data)
@@ -183,7 +175,7 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
         cmd: {
           list: {
             action: async function(this: any, entize: any, msg: any) {
-              let suffUrl = getWorkspace() + '/members/find'
+              let suffUrl =  this.shared.workspace + '/members/find'
               let json: any = await getJSON(makeUrl(suffUrl, msg.q), makeConfig())
               let data = json.data
               let list = entize(data)
@@ -196,7 +188,7 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
         cmd: {
           list: {
             action: async function(this: any, entize: any, msg: any) {
-              let suffUrl = getWorkspace() + '/organizations/' + msg.q.idOrganization + '/members'
+              let suffUrl =  this.shared.workspace + '/organizations/' + msg.q.idOrganization + '/members'
 
               let json: any = await getJSON(makeUrl(suffUrl, msg.q), makeConfig())
               let data = json.data
@@ -210,7 +202,7 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
         cmd: {
           save: {
             action: async function(this: any, entize: any, msg: any) {
-              let suffUrl = getWorkspace() + '/members/' + msg.q.idMember
+              let suffUrl =  this.shared.workspace + '/members/' + msg.q.idMember
               let body = msg.q.body;
               let res: any = await putJSON(makeUrl(suffUrl, msg.q), makeConfig(body))
               
@@ -224,7 +216,7 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
         cmd: {
           save: {
             action: async function(this: any, entize: any, msg: any) {
-              let suffUrl = getWorkspace() + '/members'
+              let suffUrl =  this.shared.workspace + '/members'
               let body = msg.q.body;
               let json: any = await postJSON(makeUrl(suffUrl, msg.q), makeConfig(body))
               let data = json.data
@@ -250,8 +242,9 @@ function OrbitProvider(this: any, options: OrbitProviderOptions) {
     this.shared.headers = {
       Authorization: 'Bearer ' + res.keymap.key.value
     }
-
-    setWorkspace(res.keymap.workspace.value)
+     
+    this.shared.workspace = res.keymap.workspace.value
+    setWorkspace()
 
   })
 
