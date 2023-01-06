@@ -31,11 +31,11 @@ Seneca({ legacy: false })
     const seneca = this
 
     console.log(await seneca.post('sys:provider,provider:orbit,get:info'))
-
-    //List members in a workspace
+    
+    // List members in a workspace
     const list_member = await seneca.entity("provider/orbit/member").list$()
     console.log(list_member)
-      // get first user in list_member to next test
+    // get first user in list_member to next test
     let idMember = list_member[0]['id']
     let source = 'foo'
     let name = list_member[0]['attributes']['slug']
@@ -70,10 +70,10 @@ Seneca({ legacy: false })
     const get_member = await seneca.entity("provider/orbit/member").load$({'idMember': idMember})
     console.log('get_member', get_member)
 
-    //List members in an organization
-      // id mocked
+    // //List members in an organization
+    //   // id mocked
     let idOrganization = '4qF2KgZ'
-    const list_member_by_organization = await seneca.entity("provider/orbit/list_member_by_organization").list$({'idOrganization': idOrganization})
+    const list_member_by_organization = await seneca.entity("provider/orbit/list_member_by_organization").list$({'idOrganization': '4qF2KgZ'})
     console.log('list_member_by_organization', list_member_by_organization)
   
     // Update a member
