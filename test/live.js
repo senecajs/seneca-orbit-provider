@@ -1,11 +1,8 @@
 
 // IMPORTANT: assumes node-fetch@2
-const Fetch = require('node-fetch')
-
 const Seneca = require('seneca')
 
 // global.fetch = Fetch
-
 
 Seneca({ legacy: false })
   .test()
@@ -15,93 +12,81 @@ Seneca({ legacy: false })
     // debug: true,
     file: [__dirname + '/local-env.js;?'],
     var: {
-      $TANGOCARD_KEY: String,
-      $TANGOCARD_NAME: String,
-      $TANGOCARD_CUSTID: String,
-      $TANGOCARD_ACCID: String,
+      $ORBIT_API_TOKEN: String,
+      $WORKSPACE: String,
     }
   })
   .use('provider', {
     provider: {
-      tangocard: {
+      orbit: {
         keys: {
-          key: { value: '$TANGOCARD_KEY' },
-          name: { value: '$TANGOCARD_NAME' },
-          cust: { value: '$TANGOCARD_CUSTID' },
-          acc: { value: '$TANGOCARD_ACCID' },
+          key: { value: '$ORBIT_API_TOKEN' },
+          workspace: { value: '$WORKSPACE' },
         }
       }
     }
   })
-  .use('../',{
-    fetch: Fetch,
-    entity: {
-      order: {
-        save: {
-          sendEmail: true,
-          sender: {
-            email: 'richard+tangocard.sender.01@ricebridge.com',
-            firstName: 'Sender',
-            lastName: ''
-          }
-        }
-      }
-    }
-  })
+  .use('../')
   .ready(async function() {
     const seneca = this
 
-    console.log(await seneca.post('sys:provider,provider:tangocard,get:info'))
+    console.log(await seneca.post('sys:provider,provider:orbit,get:info'))
     
-    const brands = await seneca.entity("provider/tangocard/brand").list$({
-      country: 'IE', verbose: false
-    })
-    console.log('brands',brands.length)
-    // console.dir(brands,{depth:null})
-    
-    let customers = await seneca.entity("provider/tangocard/customer").list$()
-    console.log('customers', customers.length)
-    console.dir(customers,{depth:null})
-    
-    let orders = await seneca.entity('provider/tangocard/order').list$()
-    console.log('orders',orders.length)
-
-    
-    let mark = Math.random()+''
-    let utid = 'U768452'
-    
-    let order = seneca.entity('provider/tangocard/order').data$({
-      amount: 10,
-      // campaign: 'test01',
-      campaign: '',
-      emailSubject: 'subject '+mark,
-      etid: 'E000000',
-      externalRefID: seneca.util.Nid(),
-      message: 'msg '+mark,
-      notes: 'note '+mark,
-      recipient: {
-        email: 'richard+tangocard.test.01@ricebridge.com',
-        firstName: 'First',
-        lastName: ''
-      },
-      // sendEmail: true,
-      // sender: {
-      //   email: '',
-      //   firstName: '',
-      //   lastName: ''
-      // },
-      utid
-    })
-
-    try {
-      order = await order.save$()
-      console.log('order',order)
+    // List members in a workspace
+    const list_member = await seneca.entity("provider/orbit/member").list$()
+    console.log(list_member)
+    // get first user in list_member to next test
+    let idMember = list_member[0]['id']
+    let source = 'foo'
+    let name = list_member[0]['attributes']['slug']
+    let body_to_add_identity = {
+        'body': {
+          "source": source,
+          "username": name,
+        }
     }
-    catch(e) {
-      console.log(e.message)
-      console.log(e.status)
-      console.log(e.body)
-    }
+    //Add identity to a member
+    const add_identity_member = await seneca.entity("provider/orbit/identify_member").save$({'idMember': idMember, 'body': body_to_add_identity})
+    console.log('add_identity_member', add_identity_member)
 
+    // Create or update a member
+      //mock source
+    let body_to_create_member = {
+      'body': {
+        "identity": {
+            "source": "api",
+            "username": "foo"
+        }
+      }
+    }
+    const create_or_update_member = await seneca.entity("provider/orbit/create_member").save$({'body': body_to_create_member})
+    console.log('create_or_update_member', create_or_update_member)
+
+    //Find a member by an identity
+    const find_member_by_identify = await seneca.entity("provider/orbit/identify_member").list$({'source': source, 'username': name})
+    console.log('find_member_by_identify', find_member_by_identify)
+
+    //Get a member
+    const get_member = await seneca.entity("provider/orbit/member").load$({'idMember': idMember})
+    console.log('get_member', get_member)
+
+    // //List members in an organization
+    //   // id mocked
+    let idOrganization = '4qF2KgZ'
+    const list_member_by_organization = await seneca.entity("provider/orbit/list_member_by_organization").list$({'idOrganization': '4qF2KgZ'})
+    console.log('list_member_by_organization', list_member_by_organization)
+  
+    // Update a member
+      // mock body to update member
+    let body_to_update_member = {
+      'body': {
+        "name": "foo",
+        "bio": "bar"
+      }
+    }
+    const update_member = await seneca.entity("provider/orbit/member").save$({'idMember': idMember, 'body': body_to_update_member})
+    console.log('update_member', update_member)
+    
+    return true;
   })
 
